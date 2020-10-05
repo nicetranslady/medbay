@@ -1,158 +1,210 @@
-function writeJSONFile (file) {
+function displayFile (file) {
+    // Display fie information
+    // Initialise variables
+    var userData = {};
+
     // create object to handle JSON file
-    userJSON = file.data;
-    // createP(userJSON.Source.User.Name);
-    
-    // Create a Jumbotron with file and user details
-    // Write the HTML
-    jumboCode = '<div class="jumbotron">';
-    jumboCode += '<p>File Name: ' + file.name + '</p>';
-    jumboCode += '<p>File Size: ' + file.size + '</p>';
-    jumboCode += '<p>Source: ' + userJSON.Source.System.Name + '</p>';
-    jumboCode += '<p>Provider: ' + userJSON.Source.System.Provider + '</p>';
-    jumboCode += '<p>User Name: ' + userJSON.Source.User.Name + '</p>';
-    jumboCode += '<p>Date of Birth: ' + userJSON.Source.User.DateOfBirth + '</p>';
-    for (i in userJSON.Source.User.Identifiers) {
-        if (userJSON.Source.User.Identifiers[i].Type == "NhsNumber") {
-            jumboCode += '<p>NHS Number: ' + userJSON.Source.User.Identifiers[i].Value + '</p>';
-        }
-    }
-    jumboCode += '</div>';
-    // Insert the HTML
-    document.getElementById("jumboHeader").innerHTML = jumboCode;
+    userData = file.data;
+
+    // Draw the Jumbotron
+    drawJumbotron (file);
+
+    // Draw the nav
+    drawNav (userData);
+}
+
+function drawJumbotron (file) {
+    // Write information from file into the Jumbotron
+    // Initialise variables
+    var
+        filename = "",
+        filesize = 0,
+        jumboCode = "",
+        NHSNumber = "",
+        NHSNumberDisplay = "",
+        provider = "",
+        source = "",
+        userData = {},
+        userDOB = "",
+        username = "";
+
+    // create object to handle JSON file
+    userData = file.data;
+
     // Make the Jumbotron visible
-    document.getElementById("jumboHeader").hidden = false;
-    
-    // Create tabs available for each subject
-    tabsCode = '<nav><div class="nav nav-tabs" id="nav-tab" role="tablist">';
-    // Problems
-    if (userJSON.Problems != null) {
-        tabsCode += '<a class="nav-link active" id="nav-problems-tab" data-toggle="tab" href="#nav-problems" role="tab" aria-controls="nav-problems" aria-selected="true">Problems</a>';
-    } else {
-        tabsCode += '<a class="nav-link disabled" id="nav-problems-tab" data-toggle="tab" href="#nav-problems" role="tab" aria-controls="nav-problems" aria-selected="false" aria-disabled="true">Problems <span class="badge badge-light">0</span></a>';
-    }
-    // Medications
-    if (userJSON.Medications != null) {
-        tabsCode += '<a class="nav-link active" id="nav-medications-tab" data-toggle="tab" href="#nav-medications" role="tab" aria-controls="nav-medications" aria-selected="true">Medications</a>';
-    } else {
-        tabsCode += '<a class="nav-link disabled" id="nav-medications-tab" data-toggle="tab" href="#nav-medications" role="tab" aria-controls="nav-medications" aria-selected="false" aria-disabled="true">Medications <span class="badge badge-light">0</span></a>';
-    }
-    // Test Results
-    if (userJSON.TestResults != null) {
-        tabsCode += '<a class="nav-link active" id="nav-testResults-tab" data-toggle="tab" href="#nav-testResults" role="tab" aria-controls="nav-testResults" aria-selected="true">Test Results</a>';
-    } else {
-        tabsCode += '<a class="nav-link disabled" id="nav-testResults-tab" data-toggle="tab" href="#nav-testResults" role="tab" aria-controls="nav-testResults" aria-selected="false" aria-disabled="true">Test Results <span class="badge badge-light">0</span></a>';
-    }
-    // Consultations
-    if (userJSON.Consultations != null) {
-        tabsCode += '<a class="nav-link active" id="nav-consultations-tab" data-toggle="tab" href="#nav-consultations" role="tab" aria-controls="nav-consultations" aria-selected="true">Consultations</a>';
-    } else {
-        tabsCode += '<a class="nav-link disabled" id="nav-consultations-tab" data-toggle="tab" href="#nav-consultations" role="tab" aria-controls="nav-consultations" aria-selected="false" aria-disabled="true">Consultations <span class="badge badge-light">0</span></a>';
-    }
-    // Immunisations
-    if (userJSON.Immunisations != null) {
-        tabsCode += '<a class="nav-link active" id="nav-immunisations-tab" data-toggle="tab" href="#nav-immunisations" role="tab" aria-controls="nav-immunisations" aria-selected="true">Immunisations</a>';
-    } else {
-        tabsCode += '<a class="nav-link disabled" id="nav-immunisations-tab" data-toggle="tab" href="#nav-immunisations" role="tab" aria-controls="nav-immunisations" aria-selected="false" aria-disabled="true">Immunisations <span class="badge badge-light">0</span></a>';
-    }
-    // Allergies
-    if (userJSON.Allergies != null) {
-        tabsCode += '<a class="nav-link active" id="nav-allergies-tab" data-toggle="tab" href="#nav-allergies" role="tab" aria-controls="nav-allergies" aria-selected="true">Allergies</a>';
-    } else {
-        tabsCode += '<a class="nav-link disabled" id="nav-allergies-tab" data-toggle="tab" href="#nav-allergies" role="tab" aria-controls="nav-allergies" aria-selected="false" aria-disabled="true">Allergies <span class="badge badge-light">0</span></a>';
-    }
-    tabsCode += '</div></nav>';
-    // Create content for each tab subject
-    tabsCode += '<div class="tab-content" id="nav-tabContent">';
-    // Problems
-    if (userJSON.Problems != null) {
-        tabsCode += '<div class="tab-pane fade show active" id="nav-problems" role="tabpanel" aria-labelledby="nav-problems-tab">...</div>';
-    }
-    // Medications
-    if (userJSON.Medications != null) {
-        tabsCode += '<div class="tab-pane fade show active" id="nav-medications" role="tabpanel" aria-labelledby="nav-medications-tab">...</div>';
-    }
-    // Test Results
-    if (userJSON.TestResults != null) {
-        tabsCode += '<div class="tab-pane fade show active" id="nav-testResults" role="tabpanel" aria-labelledby="nav-testResults-tab">';
-        for (i in userJSON.TestResults) {
-            // Create test heading with title and date created
-            tabCaption = userJSON.TestResults[i].Title + " (" + userJSON.TestResults[i].Created + ")";
-            // Create a collapse ID from above with no spaces or special characters
-            tabCaptionID = userJSON.TestResults[i].Title + userJSON.TestResults[i].Created;
-            tabCaptionID = tabCaptionID.replace(/ /g,"");
-            tabCaptionID = tabCaptionID.replace(/-/g,"");
-            tabCaptionID = tabCaptionID.replace(/\//g,"");
-            tabsCode += '<div><button class="btn btn-light" type="button" data-toggle="collapse" data-target="#' + tabCaptionID + '" aria-expanded="false" aria-controls="' + tabCaptionID + '">' + tabCaption + '</button></div>';
-            tabsCode += '<div class="collapse" id="' + tabCaptionID + '"><div class="card card-body">';
-            for (j in userJSON.TestResults[i].TestResultLines) {
-                // Learn Ranges
-                normalRangeArray = userJSON.TestResults[i].TestResultLines[j].NormalRange.split(" - ");
-                if (normalRangeArray[0] != "N/A") {
-                    normalRangeLower = Number(normalRangeArray[0]);
-                    normalRangeUpper = Number(normalRangeArray[1]);
-                }
-                // Learn Result and Units
-                resultArray = userJSON.TestResults[i].TestResultLines[j].Result.split(" ");
-                result = Number(resultArray[0]);
-                // Assume no warning required?
-                cardColour = "text-white bg-success";
-                if (normalRangeArray[0] != "N/A") {
-                    // Unless the result is outside of the range
-                    if (result < normalRangeLower || result > normalRangeUpper) {
-                        cardColour = "text-white bg-danger";
-                    }
-                    if (result == normalRangeLower || result == normalRangeUpper) {
-                        cardColour = "text-black bg-warning";
-                    }
-                } else {
-                    // Unless there are no normal ranges
-                    cardColour = "text-black bg-light";
-                }
-                // Ouput the card
-                tabsCode += '<div class="card card-body ' + cardColour + '">';
-                tabsCode += userJSON.TestResults[i].TestResultLines[j].Description;
-                tabsCode += "<strong>" + result + " " + resultArray[1] + "</strong> ";
-                if (normalRangeArray[0] != "N/A") {
-                    tabsCode += "Normal Range: " + normalRangeLower + " - " + normalRangeUpper;
-                } else {
-                    tabsCode += "Normal Range: " + normalRangeArray[0];
-                } 
-                tabsCode += '</div>';
-            }
-            tabsCode += '</div></div>';
+    document.getElementById("jumbo").hidden = false;
+
+    // Get variables
+    filename = file.name;
+    filesize = file.size;
+    source = userData.Source.System.Name;
+    provider = userData.Source.System.Provider;
+    username = userData.Source.User.Name;
+    userDOB = userData.Source.User.DateOfBirth;
+    for (i in userData.Source.User.Identifiers) {
+        if (userData.Source.User.Identifiers[i].Type == "NhsNumber") {
+            // Format and display NHS Number
+            NHSNumber = userData.Source.User.Identifiers[i].Value;
+            NHSNumberDisplay = NHSNumber.slice (0,3) + " ";
+            NHSNumberDisplay += NHSNumber.slice (3,6) + " ";
+            NHSNumberDisplay += NHSNumber.slice (6);
         }
     }
-    // Consultations
-    if (userJSON.Problems != null) {
-        tabsCode += '<div class="tab-pane fade show active" id="nav-consultations" role="tabpanel" aria-labelledby="nav-consultations-tab">...</div>';
-    }
-    // Immunisations
-    if (userJSON.Problems != null) {
-        tabsCode += '<div class="tab-pane fade show active" id="nav-immunisations" role="tabpanel" aria-labelledby="nav-immunisations-tab">...</div>';
-    }
-    // Allergies
-    if (userJSON.Problems != null) {
-        tabsCode += '<div class="tab-pane fade show active" id="nav-allergies" role="tabpanel" aria-labelledby="nav-allergies-tab">...</div>';
-    }
-    tabsCode += '</div>';
-    // Insert the HTML
-    document.getElementById("nav").innerHTML = tabsCode;
-    // Make the Tabs visible
+
+    // Write code
+    jumboCode = '<h1>Patient Access JSON File Output</h1>';
+    jumboCode += '<p>File Name: ' + filename + '</p>';
+    jumboCode += '<p>File Size: ' + filesize + '</p>';
+    jumboCode += '<p>Source: ' + source + '</p>';
+    jumboCode += '<p>Provider: ' + provider + '</p>';
+    jumboCode += '<p>User Name: ' + username + '</p>';
+    jumboCode += '<p>Date of Birth: ' + userDOB + '</p>';
+    jumboCode += '<p>NHS Number: ' + NHSNumberDisplay + '</p>';
+
+    // Insert HTML jumboCode into the Jumbotron
+    document.getElementById("jumbo").innerHTML = jumboCode;
+}
+
+function drawNav (userData) {
+    // Make Nav visibile
     document.getElementById("nav").hidden = false;
-    document.getElementById("nav-testResults-tab").innerHTML = 'Test Results <span class="badge badge-primary">' + i + '</span>';
+
+    // Check to see if the subject is not null, then draw the subject content
+    // Test Results
+    if (userData.TestResults != null) {
+        // If there are Test Results, dsplay them
+        writeTestResults (userData);
+    }
+}
+
+function writeTestResults (userData) {
+    // Write Test Results subject data into the nave details div
+    // Initialise Variables
+    var
+        i = 0,
+        testResultCode = "";
+
+    // Enable Test Results tab in nav and details
+    document.getElementById("nav-testResults-tab").innerHTML = 'Test Results <span class="badge badge-primary">0</span>';
+    document.getElementById("nav-testResults").hidden = false;
+
+    // Review Test Results
+    for (i in userData.TestResults) {
+        // Parse Test Result
+        testResultCode = parseTestResult(userData.TestResults[i]);
+        //Write Test Result
+        document.getElementById("nav-testResults").innerHTML += testResultCode;
+        // Update Total number of Tests
+        document.getElementById("nav-testResults-tab").innerHTML = 'Test Results <span class="badge badge-primary">' + (Number(i) + 1) + '</span>';
+    }
+}
+
+function createTestResultID (testResultID) {
+    // Create a Test Result ID for use in the structure of Test Result Lines
+    testResultID = testResultID.replace(/ /g,"");
+    testResultID = testResultID.replace(/-/g,"");
+    testResultID = testResultID.replace(/\//g,"");
+    return testResultID;
+}
+
+function parseTestResult (testResult) {
+    // Parse test result information and return HTML
+    // Initialise variables
+    var
+        buttonID = "",
+        caption = "",
+        captionID = "",
+        cardColour = "",
+        created = "",
+        i = 0,
+        normalRange = [],
+        normalRangeLower = "",
+        normalRangeUpper = "",
+        result = 0,
+        resultArray = [],
+        status = {"Total":0, "Warning":0, "Danger":0},
+        testResultCode = "",
+        testResultLinesCode = "",
+        unit = "";
+    
+    // Create Test Result Lines code
+    for (i in testResult.TestResultLines) {
+        // Learn Normal Range for Result Line
+        normalRange = testResult.TestResultLines[i].NormalRange.split(" - ");
+        if (normalRange[0] != "N/A") {
+            normalRangeLower = Number(normalRange[0]);
+            normalRangeUpper = Number(normalRange[1]);
+        }
+        // Learn Result and SI Unit
+        resultArray = testResult.TestResultLines[i].Result.split(" ");
+        result = Number(resultArray[0]);
+        unit = resultArray[1];
+
+        // Learn Status of result and get the card colour ready
+        // Default is Success
+        cardColour = "text-white bg-success";
+        if (normalRange[0] != "N/A") {
+            // Check to see if it is a Warning
+            if (result == normalRangeLower || result == normalRangeUpper) {
+                cardColour = "text-black bg-warning";
+                status.Warning ++;
+            }
+            // Or a Danger
+            if (result < normalRangeLower || result > normalRangeUpper) {
+                cardColour = "text-white bg-danger";
+                status.Danger ++;
+            }
+        } else {
+            // If there is no normal ranges, paint it grey
+            cardColour = "text-black bg-light";
+        }
+        status.Total ++;
+
+        // Write the Test Result Lines code
+        testResultLinesCode += '<div class="card card-body ' + cardColour + '">';
+        testResultLinesCode += testResult.TestResultLines[i].Description;
+        testResultLinesCode += "<strong>" + result + " " + unit + "</strong> ";
+        if (normalRange[0] != "N/A") {
+            testResultLinesCode += "Normal Range: " + normalRangeLower + " - " + normalRangeUpper;
+        } else {
+            testResultLinesCode += "Normal Range: " + normalRange[0];
+        }
+        testResultLinesCode += '</div>';
+    }
+    
+    // Create Test Result Caption
+    created = testResult.Created;
+    title = testResult.Title;
+    caption = title + " (" + created + ") ";
+    caption += '<span class="badge badge-primary">' + status.Total + '</span>&nbsp;';
+    if (status.Warning > 0) {
+        caption += '<span class="badge badge-warning">' + status.Warning + '</span>&nbsp;';
+    }
+    if (status.Danger > 0) {
+        caption += '<span class="badge badge-danger">' + status.Danger + '</span>';
+    }
+    captionID = createTestResultID(title + created);
+    buttonID = captionID + "button";
+
+    // Create Test Result code
+    testResultCode = '<div><button class="btn btn-light" type="button" data-toggle="collapse" data-target="#' + captionID + '" aria-expanded="false" aria-controls="' + captionID + '" id="' + buttonID + '">' + caption + '</button></div>';
+    testResultCode += '<div class="collapse" id="' + captionID + '"><div class="card card-body">';
+    testResultCode += testResultLinesCode;
+    testResultCode += '</div></div>'; 
+
+    // Return Test Result HTML
+    return testResultCode;
 }
 
 function fileSelected(file) {
     // check to ensure that file is of desired type
     if (file.type == "application" && file.subtype=="json") {
-        // If file is JSON then write the details
-        writeJSONFile (file);
+        // If file is JSON then draw the page
+        displayFile (file);
     } else {
         // If the file isn't JSON, the let the user know
         createP("File is not a valid JSON file")
     }
-    
 }
 
 function setup() {
