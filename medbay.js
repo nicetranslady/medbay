@@ -70,6 +70,11 @@ function drawNav (userData) {
     document.getElementById("nav").hidden = false;
 
     // Check to see if the subject is not null, then draw the subject content
+    // Medications
+    if (userData.Medications != null) {
+        // If there are Medications, dsplay them
+        writeMedications (userData.Medications);
+    }
     // Test Results
     if (userData.TestResults != null) {
         // If there are Test Results, dsplay them
@@ -77,8 +82,47 @@ function drawNav (userData) {
     }
 }
 
+function writeMedications (medications) {
+    // Write Medications subject data into the nav details div
+    // Initialise Variables
+    var
+        i = 0,
+        medicationsCode = "",
+        medicationTypeCode = "";
+
+    // Enable Test Results tab in nav and details
+    document.getElementById("nav-medications-tab").innerHTML = 'Medications <span class="badge badge-primary">0</span>';
+    document.getElementById("nav-medications").hidden = false;
+
+    // Review Medications
+    // Parse Medication
+    // Start with Acute
+    medicationsCode = parseMedication(medications.Acute);
+    // Create Acute type
+    i = Number(medications.Acute.length) - 1
+    medicationTypeCode += '<div><button class="btn btn-light" type="button" data-toggle="collapse" data-target="#acute" aria-expanded="false" aria-controls="acute" id="acuteButton">Acute <span class="badge badge-primary">' + (Number(i) + 1) + '</span></button></div>';
+    medicationTypeCode += '<div class="collapse" id="acute"><div class="card card-body">';
+    medicationTypeCode += medicationsCode;
+    medicationTypeCode += '</div></div>'; 
+
+    // Then Repeat
+    medicationsCode = parseMedication(medications.Repeat);
+    // Create Repeat type
+    i = Number(medications.Repeat.length) - 1
+    medicationTypeCode += '<div><button class="btn btn-light" type="button" data-toggle="collapse" data-target="#repeat" aria-expanded="false" aria-controls="repeat" id="repeatButton">Repeat <span class="badge badge-primary">' + (Number(i) + 1) + '</span></button></div>';
+    medicationTypeCode += '<div class="collapse" id="repeat"><div class="card card-body">';
+    medicationTypeCode += medicationsCode;
+    medicationTypeCode += '</div></div>'; 
+
+    //Write Medications
+    document.getElementById("nav-medications").innerHTML = medicationTypeCode;
+    // Update Total number of Medications
+    i = Number(medications.Acute.length) + Number(medications.Repeat.length);
+    document.getElementById("nav-medications-tab").innerHTML = 'Medications <span class="badge badge-primary">' + (Number(i)) + '</span>';
+}
+
 function writeTestResults (userData) {
-    // Write Test Results subject data into the nave details div
+    // Write Test Results subject data into the nav details div
     // Initialise Variables
     var
         i = 0,
@@ -105,6 +149,32 @@ function createTestResultID (testResultID) {
     testResultID = testResultID.replace(/-/g,"");
     testResultID = testResultID.replace(/\//g,"");
     return testResultID;
+}
+
+function parseMedication (medications) {
+    // Parse Medication information and return HTML
+    // Initialise variables
+    var
+        description = "",
+        i = 0,
+        lastIssued = "",
+        medicationCode = "";
+
+    // Create medications code
+    for (i in medications) {
+        // Get data
+        description = medications[i].Description;
+        lastIssued = new Date(medications[i].LastIssuedDate);
+
+        // Write the Medication code
+        medicationCode += '<div class="card card-body text-black bg-light">';
+        medicationCode += "<strong>" + description + "</strong> ";
+        medicationCode += "Last Issued: " + lastIssued.toDateString();
+        medicationCode += '</div>';
+    }
+
+    // Return Medication HTML
+    return medicationCode;
 }
 
 function parseTestResult (testResult) {
