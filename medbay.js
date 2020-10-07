@@ -6,6 +6,9 @@ function drawNav (file) {
     // create object to handle JSON file
     userData = file.data;
     
+    // Make getFileBox disappear
+    document.getElementById("getFileBox").hidden = true;
+    
     // Make Nav visibile
     document.getElementById("nav").hidden = false;
 
@@ -14,18 +17,33 @@ function drawNav (file) {
     writeFileDetails (file);
     // Problems
     if (userData.Problems != null) {
-        // If there are Medications, dsplay them
+        // If there are Medications, display them
         writeProblems (userData.Problems);
     }
     // Medications
     if (userData.Medications != null) {
-        // If there are Medications, dsplay them
+        // If there are Medications, display them
         writeMedications (userData.Medications);
     }
     // Test Results
     if (userData.TestResults != null) {
-        // If there are Test Results, dsplay them
-        writeTestResults (userData);
+        // If there are Test Results, display them
+        writeTestResults (userData.TestResults);
+    }
+    // Consultations
+    if (userData.Consultations != null) {
+        // If there are Test Results, display them
+        writeConsultations (userData.Consultations);
+    }
+    // Immunisations
+    if (userData.Immunisations != null) {
+        // If there are Test Results, display them
+        writeImmunisations (userData.Immunisations);
+    }
+    // Allergies
+    if (userData.Allergies != null) {
+        // If there are Test Results, display them
+        // writeAllergies (userData.Allergies);
     }
 
     // Update nav to enable tabs and show the first available data
@@ -85,7 +103,7 @@ function writeProblems (problems) {
     var
         i = 0,
         problemsCode = "",
-        problemTypeCode = "";
+        problemTypeCode = "<p>&nbsp;</p>";
 
     // Enable Problems tab in nav and details
     document.getElementById("nav-problems-tab").innerHTML = 'Problems <span class="badge badge-primary">0</span>';
@@ -124,7 +142,7 @@ function writeMedications (medications) {
     var
         i = 0,
         medicationsCode = "",
-        medicationTypeCode = "";
+        medicationTypeCode = "<p>&nbsp;</p>";
 
     // Enable Medications tab in nav and details
     document.getElementById("nav-medications-tab").innerHTML = 'Medications <span class="badge badge-primary">0</span>';
@@ -157,26 +175,93 @@ function writeMedications (medications) {
     document.getElementById("nav-medications-tab").innerHTML = 'Medications <span class="badge badge-primary">' + (Number(i)) + '</span>';
 }
 
-function writeTestResults (userData) {
+function writeTestResults (testResults) {
     // Write Test Results subject data into the nav details div
     // Initialise Variables
-    var
+    var buttonID = "",
+        caption = "",
+        captionID = "",
+        created = "",
         i = 0,
-        testResultCode = "";
+        testResultsCode = "<p>&nbsp;</p>",
+        testResultLine = {"total": 0, "warning":0, "danger":0, "code": ""},
+        title = "";
 
     // Enable Test Results tab in nav and details and emty the nav content
     document.getElementById("nav-testResults-tab").innerHTML = 'Test Results <span class="badge badge-primary">0</span>';
     document.getElementById("nav-testResults").hidden = false;
-    document.getElementById("nav-testResults").innerHTML = "";
 
     // Review Test Results
-    for (i in userData.TestResults) {
-        // Parse Test Result
-        testResultCode = parseTestResult(userData.TestResults[i]);
-        //Write Test Result
-        document.getElementById("nav-testResults").innerHTML += testResultCode;
+    for (i in testResults) {
+        // Parse Test Result Lines
+        testResultLine = parseTestResultLines(testResults[i]);
+
+        // Create Test Result Caption and Button variables
+        created = testResults[i].Created;
+        title = testResults[i].Title;
+        caption = title + " (" + created + ") ";
+        captionID = "testResult" + i;
+        buttonID = captionID + "button";
+
+        // Create button, caption and status code
+        caption += '<span class="badge badge-primary">' + testResultLine.total + '</span>&nbsp;';
+        if (testResultLine.warning > 0) {
+            caption += '<span class="badge badge-warning">' + testResultLine.warning + '</span>&nbsp;';
+        }
+        if (testResultLine.danger > 0) {
+            caption += '<span class="badge badge-danger">' + testResultLine.danger + '</span>';
+        }
+
+        // Create Test Result code
+        testResultsCode += '<div><button class="btn btn-light" type="button" data-toggle="collapse" data-target="#' + captionID + '" aria-expanded="false" aria-controls="' + captionID + '" id="' + buttonID + '">' + caption + '</button></div>';
+        testResultsCode += '<div class="collapse" id="' + captionID + '"><div class="card card-body">';
+        testResultsCode += testResultLine.code;
+        testResultsCode += '</div></div>';
+
         // Update Total number of Tests
         document.getElementById("nav-testResults-tab").innerHTML = 'Test Results <span class="badge badge-primary">' + (Number(i) + 1) + '</span>';
+    }
+    //Write Test Result code
+    document.getElementById("nav-testResults").innerHTML += testResultsCode;
+}
+
+function writeConsultations (consultations) {
+    // Write Consultations subject data into the nav details div
+    // Initialise Variables
+    var consultant = "",
+        consultationDate = "",
+        consultationDetailCode = "",
+        consultationsCode = "",
+        i = 0;
+
+    // Enable Consultations tab in nav and details and emty the nav content
+    document.getElementById("nav-consultations-tab").innerHTML = 'Consultations <span class="badge badge-primary">0</span>';
+    document.getElementById("nav-consultations").hidden = false;
+    document.getElementById("nav-consultations").innerHTML = "<p>&nbsp;</p>";
+
+    // Review Consultations
+    for (i in consultations) {
+        // Create Consultation Caption
+        consultationDate = consultations[i].Date;
+        consultant = consultations[i].Individual;
+        caption = consultant + " (" + consultationDate + ") ";
+        captionID = "Consultation" + i;
+        buttonID = captionID + "button";
+
+        // Parse Consultation
+        consultationDetailCode = parseConsultation(consultations[i]);
+
+        // Create Consultation code
+        consultationsCode = '<div><button class="btn btn-light" type="button" data-toggle="collapse" data-target="#' + captionID + '" aria-expanded="false" aria-controls="' + captionID + '" id="' + buttonID + '">' + caption + '</button></div>';
+        consultationsCode += '<div class="collapse" id="' + captionID + '"><div class="card card-body">';
+        consultationsCode += consultationDetailCode;
+        consultationsCode += '</div></div>'; 
+
+        //Write Consultation
+        document.getElementById("nav-consultations").innerHTML += consultationsCode;
+
+        // Update Total number of Consultations
+        document.getElementById("nav-consultations-tab").innerHTML = 'Consultations <span class="badge badge-primary">' + (Number(i) + 1) + '</span>';
     }
 }
 
@@ -191,8 +276,7 @@ function createTestResultID (testResultID) {
 function parseProblems (problems) {
     // Parse Medication information and return HTML
     // Initialise variables
-    var
-        description = "",
+    var description = "",
         i = 0,
         startDate = "",
         problemCode = "";
@@ -240,39 +324,67 @@ function parseMedication (medications) {
     return medicationCode;
 }
 
-function parseTestResult (testResult) {
+function parseTestResultLines (testResult) {
     // Parse test result information and return HTML
     // Initialise variables
-    var
-        buttonID = "",
-        caption = "",
-        captionID = "",
-        cardColour = "",
-        created = "",
+    var cardColour = "",
         i = 0,
         normalRange = [],
-        normalRangeLower = "",
-        normalRangeUpper = "",
+        normalRangeText = "",
+        normalRangeLower = 0,
+        normalRangeUpper = 0,
         result = 0,
         resultArray = [],
-        status = {"Total":0, "Warning":0, "Danger":0},
-        testResultCode = "",
-        testResultLinesCode = "",
+        testResultLine = {"total": 0, "warning":0, "danger":0, "code": ""},
         unit = "";
     
     // Create Test Result Lines code
     for (i in testResult.TestResultLines) {
-        // Learn Normal Range for Result Line
-        normalRange = testResult.TestResultLines[i].NormalRange.split(" - ");
-        if (normalRange[0] != "N/A") {
-            normalRangeLower = Number(normalRange[0]);
-            normalRangeUpper = Number(normalRange[1]);
-        }
         // Learn Result and SI Unit
         resultArray = testResult.TestResultLines[i].Result.split(" ");
+        resultArray[0] = resultArray[0].trim();
+        resultArray[1] = resultArray[1].trim();
         result = Number(resultArray[0]);
         unit = resultArray[1];
 
+        // Learn Normal Range for Result Line
+        // Make sure that the SI unit is not present in the range
+        normalRangeText = testResult.TestResultLines[i].NormalRange;
+        normalRangeText = normalRangeText.replace(unit, "");
+        normalRangeText = normalRangeText.trim();
+        normalRange = normalRangeText.split(" - ");
+        // Check Anomalous range
+        if (normalRange.length == 1) {
+            // Check to see if we have > or < symbols
+            if ((normalRange[0].indexOf("<") > -1) || (normalRange[0].indexOf(">") > -1)) {
+                // console.log(normalRange);
+                if (normalRange[0].indexOf("<") > -1) {
+                    // Remove < symbol and any extra spaces
+                    normalRange[0] = normalRange[0].replace("<", "");
+                    normalRange[0] = normalRange[0].trim();
+                    // Create new range
+                    normalRange[1] = normalRange[0];
+                    normalRange[0] = "0";
+                } else {
+                    // Remove > symbol and any extra spaces
+                    normalRange[0] = normalRange[0].replace(">", "");
+                    normalRange[0] = normalRange[0].trim();
+                    // Create new range
+                    normalRange[1] = "INFINITY";
+                }
+                // console.log(normalRange);
+            }
+        }
+        if (normalRange[0] != "N/A") {
+            // Rewrite normal ranges to include infinity to cope with < and >
+            normalRangeLower = Number(normalRange[0]);
+            if (normalRange[1] == "INFINITY") {
+                normalRangeUpper = Number(Infinity);
+            } else {
+                normalRangeUpper = Number(normalRange[1]);
+            }
+        }
+        
         // Learn Status of result and get the card colour ready
         // Default is Success
         cardColour = "text-white bg-success";
@@ -280,53 +392,62 @@ function parseTestResult (testResult) {
             // Check to see if it is a Warning
             if (result == normalRangeLower || result == normalRangeUpper) {
                 cardColour = "text-black bg-warning";
-                status.Warning ++;
+                testResultLine.warning ++;
             }
             // Or a Danger
             if (result < normalRangeLower || result > normalRangeUpper) {
                 cardColour = "text-white bg-danger";
-                status.Danger ++;
+                testResultLine.danger ++;
             }
         } else {
-            // If there is no normal ranges, paint it grey
+            // If there is no normal range, paint it grey
             cardColour = "text-black bg-light";
         }
-        status.Total ++;
 
         // Write the Test Result Lines code
-        testResultLinesCode += '<div class="card card-body ' + cardColour + '">';
-        testResultLinesCode += testResult.TestResultLines[i].Description;
-        testResultLinesCode += "<strong>" + result + " " + unit + "</strong> ";
+        testResultLine.code += '<div class="card card-body ' + cardColour + '">';
+        testResultLine.code += testResult.TestResultLines[i].Description;
+        testResultLine.code += "<strong>" + result + " " + unit + "</strong> ";
         if (normalRange[0] != "N/A") {
-            testResultLinesCode += "Normal Range: " + normalRangeLower + " - " + normalRangeUpper;
+            // Deal with any issues with Infinity for display
+            if (normalRangeUpper == Infinity) {
+                testResultLine.code += "Normal Range: >" + normalRangeLower;
+            } else {
+                testResultLine.code += "Normal Range: " + normalRangeLower + " - " + normalRangeUpper;
+            }
         } else {
-            testResultLinesCode += "Normal Range: " + normalRange[0];
+            testResultLine.code += "Normal Range: " + normalRange[0];
         }
-        testResultLinesCode += '</div>';
+        testResultLine.code += '</div>';
+        testResultLine.total ++;
     }
-    
-    // Create Test Result Caption
-    created = testResult.Created;
-    title = testResult.Title;
-    caption = title + " (" + created + ") ";
-    caption += '<span class="badge badge-primary">' + status.Total + '</span>&nbsp;';
-    if (status.Warning > 0) {
-        caption += '<span class="badge badge-warning">' + status.Warning + '</span>&nbsp;';
-    }
-    if (status.Danger > 0) {
-        caption += '<span class="badge badge-danger">' + status.Danger + '</span>';
-    }
-    captionID = createTestResultID(title + created);
-    buttonID = captionID + "button";
-
-    // Create Test Result code
-    testResultCode = '<div><button class="btn btn-light" type="button" data-toggle="collapse" data-target="#' + captionID + '" aria-expanded="false" aria-controls="' + captionID + '" id="' + buttonID + '">' + caption + '</button></div>';
-    testResultCode += '<div class="collapse" id="' + captionID + '"><div class="card card-body">';
-    testResultCode += testResultLinesCode;
-    testResultCode += '</div></div>'; 
-
     // Return Test Result HTML
-    return testResultCode;
+    return testResultLine;
+}
+
+function parseConsultation (consultation) {
+    // Parse Consultation information and return HTML
+    // Initialise variables
+    var consultationCode = "",
+        details = consultation.Details,
+        detailsCount = 0,
+        location = consultation.Location;
+    
+    // Check for null or empty Variables
+    if (location == null) {
+        location = "No Data";
+    }
+    detailsCount = details.length;
+    if (detailsCount == 0) {
+        details = "No Data";
+    }
+
+    // Write Consultation code
+    consultationCode = "Location: " + location + "<br>";
+    consultationCode += "Details: " + details;
+
+    // Return Consultation HTML
+    return consultationCode;
 }
 
 function fileSelected(file) {
@@ -342,6 +463,10 @@ function fileSelected(file) {
 
 function setup() {
     noCanvas();
+    let fileInput;
+
     // Create a file input box
-    createFileInput(fileSelected);
+    fileInput = createFileInput(fileSelected);
+    fileInput.parent('getFile');
+    fileInput.center();
 }
