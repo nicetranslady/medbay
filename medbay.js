@@ -222,7 +222,7 @@ function writeTestResults (testResults) {
         document.getElementById("nav-testResults-tab").innerHTML = 'Test Results <span class="badge badge-primary">' + (Number(i) + 1) + '</span>';
     }
     //Write Test Result code
-    document.getElementById("nav-testResults").innerHTML += testResultsCode;
+    document.getElementById("nav-testResults").innerHTML = testResultsCode;
 }
 
 function writeConsultations (consultations) {
@@ -265,12 +265,35 @@ function writeConsultations (consultations) {
     }
 }
 
-function createTestResultID (testResultID) {
-    // Create a Test Result ID for use in the structure of Test Result Lines
-    testResultID = testResultID.replace(/ /g,"");
-    testResultID = testResultID.replace(/-/g,"");
-    testResultID = testResultID.replace(/\//g,"");
-    return testResultID;
+function writeImmunisations (immunisations) {
+    // Write Immunisations subject data into the nav details div
+    // Initialise Variables
+    var
+        i = 0,
+        immunisationsCode = "<p>&nbsp;</p>",
+        immunisationDate = "",
+        immunisationDescription = "";
+
+    // Enable Immunisations tab in nav and details
+    document.getElementById("nav-immunisations-tab").innerHTML = 'Immunisations <span class="badge badge-primary">0</span>';
+    document.getElementById("nav-immunisations").hidden = false;
+
+    // Review Immunisations
+    // Parse Immunisations
+    for (i in immunisations) {
+        // Get Data
+        immunisationDate = immunisations[i].Date;
+        immunisationDescription = immunisations[i].Description;
+        // Write code
+        immunisationsCode += '<div class="card card-body text-black bg-light">';
+        immunisationsCode += "<strong>" + immunisationDescription + "</strong> ";
+        immunisationsCode += "Immunisatio Date: " + immunisationDate;
+        immunisationsCode += '</div>';
+    }
+
+    //Write Immunisations
+    document.getElementById("nav-immunisations").innerHTML = immunisationsCode;
+    document.getElementById("nav-immunisations-tab").innerHTML = 'Immunisations <span class="badge badge-primary">' + ((Number(i) + 1)) + '</span>';
 }
 
 function parseProblems (problems) {
