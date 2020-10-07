@@ -1,25 +1,42 @@
-function displayFile (file) {
-    // Display fie information
+function drawNav (file) {
+    // Display file information
     // Initialise variables
     var userData = {};
 
     // create object to handle JSON file
     userData = file.data;
+    
+    // Make Nav visibile
+    document.getElementById("nav").hidden = false;
 
-    // Draw the Jumbotron
-    drawJumbotron (file);
+    // Check to see if the subject is not null, then draw the subject content
+    // File Details
+    writeFileDetails (file);
+    // Problems
+    if (userData.Problems != null) {
+        // If there are Medications, dsplay them
+        writeProblems (userData.Problems);
+    }
+    // Medications
+    if (userData.Medications != null) {
+        // If there are Medications, dsplay them
+        writeMedications (userData.Medications);
+    }
+    // Test Results
+    if (userData.TestResults != null) {
+        // If there are Test Results, dsplay them
+        writeTestResults (userData);
+    }
 
-    // Draw the nav
-    drawNav (userData);
+    // Update nav to enable tabs and show the first available data
 }
 
-function drawJumbotron (file) {
-    // Write information from file into the Jumbotron
+function writeFileDetails (file) {
+    // Write information from file
     // Initialise variables
-    var
-        filename = "",
+    var filename = "",
         filesize = 0,
-        jumboCode = "",
+        fileCode = "",
         NHSNumber = "",
         NHSNumberDisplay = "",
         provider = "",
@@ -30,9 +47,6 @@ function drawJumbotron (file) {
 
     // create object to handle JSON file
     userData = file.data;
-
-    // Make the Jumbotron visible
-    document.getElementById("jumbo").hidden = false;
 
     // Get variables
     filename = file.name;
@@ -52,34 +66,56 @@ function drawJumbotron (file) {
     }
 
     // Write code
-    jumboCode = '<h1>Patient Access JSON File Output</h1>';
-    jumboCode += '<p>File Name: ' + filename + '</p>';
-    jumboCode += '<p>File Size: ' + filesize + '</p>';
-    jumboCode += '<p>Source: ' + source + '</p>';
-    jumboCode += '<p>Provider: ' + provider + '</p>';
-    jumboCode += '<p>User Name: ' + username + '</p>';
-    jumboCode += '<p>Date of Birth: ' + userDOB + '</p>';
-    jumboCode += '<p>NHS Number: ' + NHSNumberDisplay + '</p>';
+    fileCode = '<p>&nbsp;</p>';
+    fileCode += '<p>File Name: ' + filename + '</p>';
+    fileCode += '<p>File Size: ' + filesize + '</p>';
+    fileCode += '<p>Source: ' + source + '</p>';
+    fileCode += '<p>Provider: ' + provider + '</p>';
+    fileCode += '<p>User Name: ' + username + '</p>';
+    fileCode += '<p>Date of Birth: ' + userDOB + '</p>';
+    fileCode += '<p>NHS Number: ' + NHSNumberDisplay + '</p>';
 
-    // Insert HTML jumboCode into the Jumbotron
-    document.getElementById("jumbo").innerHTML = jumboCode;
+    //Write File Details
+    document.getElementById("nav-file").innerHTML = fileCode;
 }
 
-function drawNav (userData) {
-    // Make Nav visibile
-    document.getElementById("nav").hidden = false;
+function writeProblems (problems) {
+    // Write Problems subject data into the nav details div
+    // Initialise Variables
+    var
+        i = 0,
+        problemsCode = "",
+        problemTypeCode = "";
 
-    // Check to see if the subject is not null, then draw the subject content
-    // Medications
-    if (userData.Medications != null) {
-        // If there are Medications, dsplay them
-        writeMedications (userData.Medications);
-    }
-    // Test Results
-    if (userData.TestResults != null) {
-        // If there are Test Results, dsplay them
-        writeTestResults (userData);
-    }
+    // Enable Problems tab in nav and details
+    document.getElementById("nav-problems-tab").innerHTML = 'Problems <span class="badge badge-primary">0</span>';
+    document.getElementById("nav-problems").hidden = false;
+
+    // Review Problems
+    // Parse Problems
+    // Start with Current
+    problemsCode = parseProblems(problems.Current);
+    // Create Current type
+    i = Number(problems.Current.length) - 1
+    problemTypeCode += '<div><button class="btn btn-light" type="button" data-toggle="collapse" data-target="#current" aria-expanded="false" aria-controls="current" id="acuteButton">Current <span class="badge badge-primary">' + (Number(i) + 1) + '</span></button></div>';
+    problemTypeCode += '<div class="collapse" id="current"><div class="card card-body">';
+    problemTypeCode += problemsCode;
+    problemTypeCode += '</div></div>'; 
+
+    // Then Past
+    problemsCode = parseProblems(problems.Past);
+    // Create Past type
+    i = Number(problems.Past.length) - 1
+    problemTypeCode += '<div><button class="btn btn-light" type="button" data-toggle="collapse" data-target="#past" aria-expanded="false" aria-controls="past" id="repeatButton">Past <span class="badge badge-primary">' + (Number(i) + 1) + '</span></button></div>';
+    problemTypeCode += '<div class="collapse" id="past"><div class="card card-body">';
+    problemTypeCode += problemsCode;
+    problemTypeCode += '</div></div>'; 
+
+    //Write Problems
+    document.getElementById("nav-problems").innerHTML = problemTypeCode;
+    // Update Total number of Problems
+    i = Number(problems.Current.length) + Number(problems.Past.length);
+    document.getElementById("nav-problems-tab").innerHTML = 'Problems <span class="badge badge-primary">' + (Number(i)) + '</span>';
 }
 
 function writeMedications (medications) {
@@ -90,7 +126,7 @@ function writeMedications (medications) {
         medicationsCode = "",
         medicationTypeCode = "";
 
-    // Enable Test Results tab in nav and details
+    // Enable Medications tab in nav and details
     document.getElementById("nav-medications-tab").innerHTML = 'Medications <span class="badge badge-primary">0</span>';
     document.getElementById("nav-medications").hidden = false;
 
@@ -128,9 +164,10 @@ function writeTestResults (userData) {
         i = 0,
         testResultCode = "";
 
-    // Enable Test Results tab in nav and details
+    // Enable Test Results tab in nav and details and emty the nav content
     document.getElementById("nav-testResults-tab").innerHTML = 'Test Results <span class="badge badge-primary">0</span>';
     document.getElementById("nav-testResults").hidden = false;
+    document.getElementById("nav-testResults").innerHTML = "";
 
     // Review Test Results
     for (i in userData.TestResults) {
@@ -149,6 +186,32 @@ function createTestResultID (testResultID) {
     testResultID = testResultID.replace(/-/g,"");
     testResultID = testResultID.replace(/\//g,"");
     return testResultID;
+}
+
+function parseProblems (problems) {
+    // Parse Medication information and return HTML
+    // Initialise variables
+    var
+        description = "",
+        i = 0,
+        startDate = "",
+        problemCode = "";
+
+    // Create medications code
+    for (i in problems) {
+        // Get data
+        description = problems[i].Description;
+        startDate = problems[i].StartDate;
+
+        // Write the Medication code
+        problemCode += '<div class="card card-body text-black bg-light">';
+        problemCode += "<strong>" + description + "</strong> ";
+        problemCode += "Start Date: " + startDate;
+        problemCode += '</div>';
+    }
+
+    // Return Medication HTML
+    return problemCode;
 }
 
 function parseMedication (medications) {
@@ -270,7 +333,7 @@ function fileSelected(file) {
     // check to ensure that file is of desired type
     if (file.type == "application" && file.subtype=="json") {
         // If file is JSON then draw the page
-        displayFile (file);
+        drawNav (file);
     } else {
         // If the file isn't JSON, the let the user know
         createP("File is not a valid JSON file")
